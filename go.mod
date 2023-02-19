@@ -1,4 +1,4 @@
-module changeme
+module framepicker
 
 go 1.18
 
