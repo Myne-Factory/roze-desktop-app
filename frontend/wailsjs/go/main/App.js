@@ -25,3 +25,7 @@ export function GetBase64Data(arg1) {
 export function ListImages(arg1) {
   return window['go']['main']['App']['ListImages'](arg1);
 }
+
+export function MoveFile(arg1, arg2) {
+  return window['go']['main']['App']['MoveFile'](arg1, arg2);
+}

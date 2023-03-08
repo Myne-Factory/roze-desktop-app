@@ -44,7 +44,9 @@ func (a *App) DiagFolderPath(title string) string {
 
 type Image struct{
 	Name string `json:"name"`
+	Drive string `json:"drive"`
 	Path string `json:"path"`
+	FullPath string `json:"fullPath"`
 }
 
 func (a *App) ListImages(path string) []Image {
@@ -55,9 +57,26 @@ func (a *App) ListImages(path string) []Image {
 			return err
 		}
 		if !info.IsDir() && isImageFile(path) {
+			// If path contains a drive letter, split it
+			// and add it to the image struct
+			var drive string
+			if strings.Contains(path, ":") {
+				drive = strings.Split(path, ":")[0]
+			}
+
+			// Remove the drive letter from the path, we don't need it
+			var cleanPath string
+			if drive != "" {
+				cleanPath = strings.Replace(path, drive + ":", "", 1)
+			} else {
+				cleanPath = path
+			}
+
 			images = append(images, Image{
 				Name: info.Name(),
-				Path: path,
+				Path: cleanPath,
+				Drive: drive,
+				FullPath: drive + ":" + cleanPath,
 			})
 		}
 		return nil
@@ -100,6 +119,48 @@ func (a *App) CopyFile(srcPath, destPath string) error {
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
 		fmt.Println("CopyFile", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) MoveFile(srcPath, destPath string) error {
+	fmt.Println("MoveFile", srcPath, destPath)
+
+	// Open the source file for reading
+	srcFile, err := os.Open(srcPath)
+	if err != nil {
+			return err
+	}
+	defer srcFile.Close()
+
+	// Check if the destination directory exists
+	destDir := filepath.Dir(destPath)
+	if _, err := os.Stat(destDir); os.IsNotExist(err) {
+			// Create the destination directory
+			if err := os.MkdirAll(destDir, 0755); err != nil {
+					return err
+			}
+	}
+
+	// Create the destination file for writing
+	destFile, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	// Copy the contents of the source file to the destination file
+	_, err = io.Copy(destFile, srcFile)
+	if err != nil {
+		fmt.Println("MoveFile", err)
+		return err
+	}
+
+	// Delete the source file
+	if err := os.Remove(srcPath); err != nil {
+		fmt.Println("MoveFile", err)
 		return err
 	}
 

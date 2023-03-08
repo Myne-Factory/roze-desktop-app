@@ -1,4 +1,4 @@
-module framepicker
+module roze
 
 go 1.18
 

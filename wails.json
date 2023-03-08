@@ -1,13 +1,13 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "app-frame-picker",
-  "outputfilename": "app-frame-picker",
+  "name": "roze",
+  "outputfilename": "roze",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "Grokberg",
-    "email": "ruben.ne.svensson@gmail.com"
+    "name": "Myne Factory",
+    "email": "mail@mynefactory.ai"
   }
 }
