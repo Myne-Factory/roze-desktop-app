@@ -3,6 +3,7 @@ import type { main } from "wailsjs/go/models";
 
 export const sourceFolder = writable<string | null>(null);
 export const targetFolder = writable<string | null>(null);
+export const isReady = writable<boolean>(false);
 
 export const sourceFiles = writable<main.Image[]>([]);
 
@@ -15,3 +16,5 @@ export const uiChunkSize = writable(200);
 export const loading = writable<boolean>(false);
 
 export const logrocketRecording = writable<boolean>(false);
+
+export const showPrivacyPolicy = writable<boolean>(false);

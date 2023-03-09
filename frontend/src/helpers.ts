@@ -8,9 +8,11 @@ import {
   uiChunkPage,
   uiChunkSize,
   logrocketRecording,
+  isReady,
 } from "./stores";
 
 import LogRocket from "logrocket";
+import { version } from "./main";
 
 export async function openDirectoryDialog(title: string) {
   return await DiagFolderPath(title);
@@ -19,6 +21,11 @@ export async function openDirectoryDialog(title: string) {
 export async function loadSourceFolder() {
   const path = await openDirectoryDialog("Select pruning/source folder");
   if (!path) return;
+  if (get(targetFolder) === path) {
+    alert("Source and target folders cannot be the same");
+    return;
+  }
+
   sourceFolder.set(path);
 
   // Fetch the source files
@@ -28,6 +35,10 @@ export async function loadSourceFolder() {
 export async function loadTargetFolder() {
   const path = await openDirectoryDialog("Select target/output folder");
   if (!path) return;
+  if (get(sourceFolder) === path) {
+    alert("Source and target folders cannot be the same");
+    return;
+  }
   targetFolder.set(path);
 
   // Fetch the source files
@@ -38,6 +49,7 @@ export async function resetFolders() {
   sourceFolder.set(null);
   targetFolder.set(null);
   sourceFiles.set([]);
+  isReady.set(false);
 }
 
 export async function fetchFiles() {
@@ -55,6 +67,14 @@ export async function fetchFiles() {
   console.log("Length of sourceFiles: ", files.length);
   sourceFiles.set(files);
   loading.set(false);
+}
+
+export function initLogRocket() {
+  if (get(logrocketRecording)) {
+    LogRocket.init("myne-factory/roze-app", {
+      release: version,
+    });
+  }
 }
 
 export function goToImagePrompt() {

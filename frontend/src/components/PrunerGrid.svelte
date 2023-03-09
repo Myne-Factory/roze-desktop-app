@@ -2,6 +2,7 @@
   import { sourceFiles, uiColumns, uiChunkPage, uiChunkSize, loading } from "../stores";
   import { afterUpdate, onMount } from "svelte";
   import PrunerGridImage from "./PrunerGridImage.svelte";
+  import { initLogRocket } from "../helpers";
 
   let galleryWidth = 0;
   let gap = 5;
@@ -56,7 +57,7 @@
   uiChunkSize.subscribe(() => {
     recreateObserver();
   });
-
+  
   afterUpdate(() => {
     recreateObserver();
   });

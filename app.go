@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -78,52 +79,44 @@ func (a *App) ListImages(source, target string) []Image {
         Path:     cleanPath,
         Drive:    drive,
         FullPath: drive + ":" + cleanPath,
-        Copied:   false,
+				Copied:   false,
       })
     }
     return nil
   })
 
-  // Walk target directory and mark copied images as copied=true
-  err = filepath.Walk(target, func(path string, info os.FileInfo, err error) error {
-    if err != nil {
-      return err
-    }
-    if !info.IsDir() && isImageFile(path) {
-      var drive string
-      if strings.Contains(path, ":") {
-        drive = strings.Split(path, ":")[0]
-      }
-      var cleanPath string
-      if drive != "" {
-        cleanPath = strings.Replace(path, drive+":", "", 1)
-      } else {
-        cleanPath = path
-      }
-      for i := range images {
-        if images[i].FullPath == drive+":"+cleanPath {
-          images[i].Copied = true
-          return nil
-        }
-      }
-      images = append(images, Image{
-        Name:     info.Name(),
-        Path:     cleanPath,
-        Drive:    drive,
-        FullPath: drive + ":" + cleanPath,
-        Copied:   true,
-      })
-    }
-    return nil
-  })
+  
 
   if err != nil {
     return nil
   }
 
-  imageList := SortImages(images)
+  imageList := naturalSort(images)
 
   return imageList
+}
+
+func naturalSort(images []Image) []Image {
+	re := regexp.MustCompile(`(\d+)`)
+	returnImages := make([]Image, len(images))
+	copy(returnImages, images)
+
+	sort.Slice(returnImages, func(i, j int) bool {
+			a, b := returnImages[i].Name, returnImages[j].Name
+			aMatches, bMatches := re.FindAllString(a, -1), re.FindAllString(b, -1)
+			for i := 0; i < len(aMatches) && i < len(bMatches); i++ {
+					aNum, _ := strconv.Atoi(aMatches[i])
+					bNum, _ := strconv.Atoi(bMatches[i])
+					if aNum != bNum {
+							return aNum < bNum
+					}
+					a = re.ReplaceAllString(a, "")
+					b = re.ReplaceAllString(b, "")
+			}
+			return a < b
+	})
+
+	return returnImages
 }
 
 func SortImages(images []Image) []Image {

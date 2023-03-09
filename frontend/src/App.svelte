@@ -3,21 +3,36 @@
   import Logo from "./components/Logo.svelte";
   import MenuBar from "./components/MenuBar/MenuBar.svelte";
   import PrunerGrid from "./components/PrunerGrid.svelte";
+  import PrivacyPolicy from "./components/PrivacyPolicy.svelte";
 
   import { loadSourceFolder, loadTargetFolder } from "./helpers";
-  import { sourceFiles, sourceFolder, targetFolder } from "./stores"
+  import { isReady, showPrivacyPolicy, sourceFiles, sourceFolder, targetFolder } from "./stores"
   import LogrocketOptin from "./components/LogrocketOptin.svelte";
-  import { onMount } from "svelte";
-  import LogRocket from "logrocket";
   // If both folders are set, set true
-  $: isReady = $sourceFolder && $targetFolder
-  
   
 
+  async function checkIfReady() {
+    if($sourceFolder && $targetFolder) {
+      setTimeout(() => {
+        isReady.set(true)
+      }, 500);
+    }
+  }
+
+  async function loadSource() {
+    await loadSourceFolder()
+    await checkIfReady()
+  }
+
+  async function loadTarget() {
+    await loadTargetFolder()
+    await checkIfReady()
+  }
 </script>
 
 <main>
-  {#if isReady}
+  <PrivacyPolicy />
+  {#if $isReady}
     {#if $sourceFiles.length > 0}
     <MenuBar />
     {/if}
@@ -25,10 +40,14 @@
   {:else}
     <div class="not-ready">
       <Logo />
-      <div>Choose source and target folder.</div>
+      {#if $sourceFolder && $targetFolder}
+        <h3>Let's get started!</h3>
+      {:else}
+        <h3>Choose source and target folder.</h3>
+      {/if}
         <div class="folder-wrapper">
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="folder-selectors" on:click={loadSourceFolder} class:is-ready={$sourceFolder}>
+          <div class="folder-selectors" on:click={loadSource} class:is-ready={$sourceFolder}>
             <span class="folder-type">Load Source</span>
             <span class="folder-help" data-private>{$sourceFolder || 'No source selected'}</span>
             {#if $sourceFolder}
@@ -37,7 +56,7 @@
             {/if}
           </div>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="folder-selectors"on:click={loadTargetFolder} class:is-ready={$targetFolder}>
+          <div class="folder-selectors"on:click={loadTarget} class:is-ready={$targetFolder}>
             <span class="folder-type" >Load Target</span>
             <span class="folder-help" data-private>{$targetFolder || 'No target selected'}</span>
             {#if $targetFolder}

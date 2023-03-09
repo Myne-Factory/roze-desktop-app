@@ -3,7 +3,7 @@
 <style>
 
   img {
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 80%;
+    max-height: 80%;
   }
 </style>
