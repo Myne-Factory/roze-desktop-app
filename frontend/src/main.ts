@@ -5,5 +5,5 @@ const app = new App({
   target: document.getElementById("app"),
 });
 
-export const version = "0.1.1";
+export const version = "0.2.0";
 export default app;
