@@ -13,17 +13,15 @@
         uiChunkPage.set(page - 1);
       }
     }
-  }
+  };
 
 </script>
 <nav>
-  {#if $sourceFiles.length > 0}
-    <button on:click={resetFolders}>
-      Start over
-    </button>
-    <PageSelector />
-    <ColumnSizePicker />
-  {/if}
+  <button on:click={resetFolders}>
+    Change folders
+  </button>
+  <PageSelector />
+  <ColumnSizePicker />
   
 </nav>
 
@@ -35,7 +33,7 @@
     align-items: center;
     background-color: #4B70AA;
     color: white;
-    padding: 8px;
+    padding: 4px 8px;
 
     button {
       background-color: white;

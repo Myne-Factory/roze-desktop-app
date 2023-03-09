@@ -5,6 +5,7 @@ export namespace main {
 	    drive: string;
 	    path: string;
 	    fullPath: string;
+	    copied: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Image(source);
@@ -16,6 +17,7 @@ export namespace main {
 	        this.drive = source["drive"];
 	        this.path = source["path"];
 	        this.fullPath = source["fullPath"];
+	        this.copied = source["copied"];
 	    }
 	}
 

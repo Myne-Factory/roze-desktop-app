@@ -8,7 +8,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -47,46 +51,113 @@ type Image struct{
 	Drive string `json:"drive"`
 	Path string `json:"path"`
 	FullPath string `json:"fullPath"`
+	Copied bool `json:"copied"`
 }
 
-func (a *App) ListImages(path string) []Image {
-	images := []Image{}
+func (a *App) ListImages(source, target string) []Image {
+  images := []Image{}
 
-	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && isImageFile(path) {
-			// If path contains a drive letter, split it
-			// and add it to the image struct
-			var drive string
-			if strings.Contains(path, ":") {
-				drive = strings.Split(path, ":")[0]
-			}
+  // Walk source directory and add images to the array with copied=false
+  err := filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+    if err != nil {
+      return err
+    }
+    if !info.IsDir() && isImageFile(path) {
+      var drive string
+      if strings.Contains(path, ":") {
+        drive = strings.Split(path, ":")[0]
+      }
+      var cleanPath string
+      if drive != "" {
+        cleanPath = strings.Replace(path, drive + ":", "", 1)
+      } else {
+        cleanPath = path
+      }
+      images = append(images, Image{
+        Name:     info.Name(),
+        Path:     cleanPath,
+        Drive:    drive,
+        FullPath: drive + ":" + cleanPath,
+        Copied:   false,
+      })
+    }
+    return nil
+  })
 
-			// Remove the drive letter from the path, we don't need it
-			var cleanPath string
-			if drive != "" {
-				cleanPath = strings.Replace(path, drive + ":", "", 1)
-			} else {
-				cleanPath = path
-			}
+  // Walk target directory and mark copied images as copied=true
+  err = filepath.Walk(target, func(path string, info os.FileInfo, err error) error {
+    if err != nil {
+      return err
+    }
+    if !info.IsDir() && isImageFile(path) {
+      var drive string
+      if strings.Contains(path, ":") {
+        drive = strings.Split(path, ":")[0]
+      }
+      var cleanPath string
+      if drive != "" {
+        cleanPath = strings.Replace(path, drive+":", "", 1)
+      } else {
+        cleanPath = path
+      }
+      for i := range images {
+        if images[i].FullPath == drive+":"+cleanPath {
+          images[i].Copied = true
+          return nil
+        }
+      }
+      images = append(images, Image{
+        Name:     info.Name(),
+        Path:     cleanPath,
+        Drive:    drive,
+        FullPath: drive + ":" + cleanPath,
+        Copied:   true,
+      })
+    }
+    return nil
+  })
 
-			images = append(images, Image{
-				Name: info.Name(),
-				Path: cleanPath,
-				Drive: drive,
-				FullPath: drive + ":" + cleanPath,
-			})
-		}
-		return nil
-	})
+  if err != nil {
+    return nil
+  }
 
-	if err != nil {
-		return nil
-	}
+  imageList := SortImages(images)
 
-	return images
+  return imageList
+}
+
+func SortImages(images []Image) []Image {
+  // Sort the images by name, treating numeric sequences as numbers
+  sort.Slice(images, func(i, j int) bool {
+    name1 := images[i].Name
+    name2 := images[j].Name
+    for len(name1) > 0 && len(name2) > 0 {
+      rune1, size1 := utf8.DecodeRuneInString(name1)
+      rune2, size2 := utf8.DecodeRuneInString(name2)
+      if unicode.IsDigit(rune1) && unicode.IsDigit(rune2) {
+        // Compare numeric sequences as numbers
+        num1, _ := strconv.Atoi(strings.TrimLeft(name1[:size1], "0"))
+        num2, _ := strconv.Atoi(strings.TrimLeft(name2[:size2], "0"))
+        if num1 != num2 {
+          return num1 < num2
+        }
+        // If numeric sequences are equal, continue comparing strings
+        name1 = name1[size1:]
+        name2 = name2[size2:]
+      } else if rune1 != rune2 {
+        // Compare non-numeric runes
+        return rune1 < rune2
+      } else {
+        // If runes are equal, continue comparing strings
+        name1 = name1[size1:]
+        name2 = name2[size2:]
+      }
+    }
+    // If one name is a prefix of the other, the shorter name comes first
+    return len(name1) < len(name2)
+  })
+
+  return images
 }
 
 func (a *App) CopyFile(srcPath, destPath string) error {

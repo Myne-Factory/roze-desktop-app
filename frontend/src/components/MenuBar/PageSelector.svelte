@@ -1,69 +1,8 @@
 
 <script lang="ts">
+  import { chunkPrompt, goToImagePrompt, pagePrompt } from "../../helpers";
   import { sourceFiles, uiChunkPage, uiChunkSize } from "../../stores";
-
-  function goToImagePrompt() {
-    const index = prompt(`Enter an image index between 1 and ${$sourceFiles.length}`, "1");
-
-    if (!index) {
-      return;
-    }
-
-    if (parseInt(index) < 1 || parseInt(index) > $sourceFiles.length) {
-      alert("Index must be between 1 and " + $sourceFiles.length);
-      return;
-    }
-
-    uiChunkPage.set(Math.floor((parseInt(index) - 1) / $uiChunkSize));
-  }
-
-  function pagePrompt() {
-    const page = parseInt(prompt("Page number", ($uiChunkPage + 1).toString()));
-    const maxPage = Math.floor($sourceFiles.length / $uiChunkSize) + 1;
-    if (page > maxPage) {
-      alert("Page number must be less than " + maxPage + ", setting to max page");
-      uiChunkPage.set(maxPage - 1);
-      return;
-    }
-
-    if (page < 1) {
-      alert("Page number must be greater than 0, setting to page 1");
-      uiChunkPage.set(0);
-      return;
-    }
-
-    if (page) {
-      uiChunkPage.set(page - 1);
-    }
-  };
-
-  function chunkPrompt() {
-    const chunk = prompt("Chunk size", $uiChunkSize.toString());
-
-
-    if (chunk) {
-      if (parseInt(chunk) < 1) {
-        alert("Chunk size must be at least 1");
-        return;
-      }
-
-      if (parseInt(chunk) > 500 && parseInt(chunk) < $sourceFiles.length) {
-        const confirm = prompt("Are you sure you want to set the chunk size to " + chunk + "? This may cause performance issues.");
-        if (confirm !== "yes") {
-          uiChunkSize.set(parseInt(chunk));
-          return;
-        }
-        return;
-      }
-
-      if (parseInt(chunk) > $sourceFiles.length) {
-        alert("Setting chunk to max value of " + $sourceFiles.length);
-        uiChunkSize.set($sourceFiles.length);
-        return;
-      }
-      uiChunkSize.set(parseInt(chunk));
-    }
-  }
+  import AnimatedNumber from "../AnimatedNumber.svelte";
 </script>
 
 <div>
@@ -85,7 +24,7 @@
   <button on:click={goToImagePrompt}>
     Go to image
   </button>
-  <span>{$sourceFiles.length} images</span>
+  <div class="image-count"><AnimatedNumber delay={500} duration={2500} value={$sourceFiles.length} /> <span>images</span></div>
 </div>
 
 <style lang="scss">
@@ -95,7 +34,18 @@
     justify-content: space-between;
     align-items: center;
     color: white;
-    padding: 8px;
+
+    .image-count {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      margin: 0 10px;
+
+      span {
+        margin-left: 5px;
+      }
+    }
 
     button {
       background-color: white;

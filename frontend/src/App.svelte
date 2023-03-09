@@ -1,32 +1,48 @@
 <script lang="ts">
-  import Chat from "./components/chatgpt/Chat.svelte";
+  import CheckIcon from "./components/CheckIcon.svelte";
   import Logo from "./components/Logo.svelte";
   import MenuBar from "./components/MenuBar/MenuBar.svelte";
   import PrunerGrid from "./components/PrunerGrid.svelte";
 
   import { loadSourceFolder, loadTargetFolder } from "./helpers";
-  import { sourceFolder, targetFolder } from "./stores"
+  import { sourceFiles, sourceFolder, targetFolder } from "./stores"
+  import LogrocketOptin from "./components/LogrocketOptin.svelte";
+  import { onMount } from "svelte";
+  import LogRocket from "logrocket";
   // If both folders are set, set true
   $: isReady = $sourceFolder && $targetFolder
   
+  
+
 </script>
 
 <main>
-  <MenuBar />
   {#if isReady}
+    {#if $sourceFiles.length > 0}
+    <MenuBar />
+    {/if}
     <PrunerGrid />
   {:else}
     <div class="not-ready">
       <Logo />
       <div>Choose source and target folder.</div>
         <div class="folder-wrapper">
-          <div class="folder-selectors">
-            <button on:click={loadSourceFolder}>Load Source</button>
-            <span>{$sourceFolder || 'No source selected'}</span>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div class="folder-selectors" on:click={loadSourceFolder} class:is-ready={$sourceFolder}>
+            <span class="folder-type">Load Source</span>
+            <span class="folder-help" data-private>{$sourceFolder || 'No source selected'}</span>
+            {#if $sourceFolder}
+              <CheckIcon />
+              
+            {/if}
           </div>
-          <div class="folder-selectors">
-            <button on:click={loadTargetFolder}>Load Target</button>
-            <span>{$targetFolder || 'No target selected'}</span>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div class="folder-selectors"on:click={loadTargetFolder} class:is-ready={$targetFolder}>
+            <span class="folder-type" >Load Target</span>
+            <span class="folder-help" data-private>{$targetFolder || 'No target selected'}</span>
+            {#if $targetFolder}
+              <CheckIcon />
+            {/if}
           </div>
         </div>
     </div>
@@ -48,7 +64,7 @@
 
       .folder-wrapper {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       justify-content: space-around;
       margin-top: 20px;
@@ -58,36 +74,53 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          height: 60px;
-          margin: 10px 0px;
+          margin: 10px 20px;
+          border: 2px solid #858585;
+          background-color: #f0f0f0;
+          border-radius: 8px;
+          padding: 20px;
+          /**Inner shadow blur 10, spread 5, opacity 10%*/
+          box-shadow: inset 0 0 10px 5px rgba(0, 0, 0, 0.1);
 
-          span {
-            flex-grow: 1;
-            padding: 10px;
+          transition: all 0.2s ease-in-out;
+          cursor: pointer;
+
+          &:hover {
+            background-color: #e0e0e0;
+          }
+
+          &:active {
+            background-color: #bdbdbd;
+          }
+          
+
+          .folder-type {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 2px;
+          }
+
+          .folder-help {
+            font-size: 20px;
+            font-style: italic;
+          }
+        }
+
+        .folder-selectors.is-ready {
+          color: white;
+          background-color: #44A46A;
+
+          &:hover {
+            background-color: #3B8E5F;
+          }
+
+          &:active {
+            background-color: #2F6F4B;
           }
         }
       }
     }
   }
 
-    button {
-      background-color: #616161;
-      border: none;
-      color: white;
-      padding: 5px;
-      font-size: 16px;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #555;
-      }
-
-      &:active {
-        background-color: #777;
-      }
-
-      &:focus {
-        outline: none;
-      }
-    }
+    
 </style>
