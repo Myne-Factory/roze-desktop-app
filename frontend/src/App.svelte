@@ -47,7 +47,7 @@
       {/if}
         <div class="folder-wrapper">
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="folder-selectors" on:click={loadSource} class:is-ready={$sourceFolder}>
+          <div class="folder-selectors" on:click={loadSource} class:is-ready={$sourceFolder} class:transition-out={$sourceFolder && $targetFolder}>
             <span class="folder-type">Load Source</span>
             <span class="folder-help" data-private>{$sourceFolder || 'No source selected'}</span>
             {#if $sourceFolder}
@@ -56,7 +56,7 @@
             {/if}
           </div>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="folder-selectors"on:click={loadTarget} class:is-ready={$targetFolder}>
+          <div class="folder-selectors"on:click={loadTarget} class:is-ready={$targetFolder} class:transition-out={$sourceFolder && $targetFolder}>
             <span class="folder-type" >Load Target</span>
             <span class="folder-help" data-private>{$targetFolder || 'No target selected'}</span>
             {#if $targetFolder}
@@ -64,6 +64,7 @@
             {/if}
           </div>
         </div>
+        <LogrocketOptin />
     </div>
   {/if}
 </main>
@@ -82,11 +83,12 @@
       height: 100%;
 
       .folder-wrapper {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-around;
-      margin-top: 20px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        margin-top: 20px;
+        
 
         .folder-selectors {
           display: flex;
@@ -135,6 +137,33 @@
 
           &:active {
             background-color: #2F6F4B;
+          }
+        }
+
+        .folder-selectors.transition-out {
+          animation: fancy-exit 0.5s ease-in-out forwards;
+        }
+
+        .folder-selectors.transition-out:nth-child(1) {
+          animation-delay: 0.2s;
+        }
+
+        .folder-selectors.transition-out:nth-child(2) {
+          animation-delay: 0.4s;
+        }
+
+        @keyframes fancy-exit {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1);
+          }
+          70% {
+            transform: scale(1.2);
+          }
+          100% {
+            transform: scale(0);
           }
         }
       }

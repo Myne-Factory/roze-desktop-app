@@ -11,6 +11,10 @@ export const uiColumns = writable(5);
 export const uiHideCopied = writable(false);
 
 export const uiChunkPage = writable(0);
+
+// Stores page as key and scroll position as value
+export const uiChunkPageScrollMemory = writable({});
+
 export const uiChunkSize = writable(200);
 
 export const loading = writable<boolean>(false);

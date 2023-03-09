@@ -9,6 +9,7 @@ import {
   uiChunkSize,
   logrocketRecording,
   isReady,
+  uiChunkPageScrollMemory,
 } from "./stores";
 
 import LogRocket from "logrocket";
@@ -103,17 +104,35 @@ export function pagePrompt() {
   if (page > maxPage) {
     alert("Page number must be less than " + maxPage + ", setting to max page");
     uiChunkPage.set(maxPage - 1);
+    loadScrollMemory();
     return;
   }
 
   if (page < 1) {
     alert("Page number must be greater than 0, setting to page 1");
     uiChunkPage.set(0);
+    loadScrollMemory();
     return;
   }
 
   if (page) {
     uiChunkPage.set(page - 1);
+    loadScrollMemory();
+  }
+}
+
+export function loadScrollMemory() {
+  const container = document.querySelector(".container") as HTMLDivElement;
+  if (!container) return;
+
+  const scrollMemory = get(uiChunkPageScrollMemory)[get(uiChunkPage)];
+  if (!scrollMemory) {
+    container.scrollTop = 0;
+    return;
+  }
+
+  if (scrollMemory) {
+    container.scrollTop = scrollMemory;
   }
 }
 

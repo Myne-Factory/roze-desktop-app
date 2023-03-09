@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { sourceFiles, uiColumns, uiChunkPage, uiChunkSize, loading } from "../stores";
+  import { sourceFiles, uiColumns, uiChunkPage, uiChunkSize, loading, uiChunkPageScrollMemory } from "../stores";
   import { afterUpdate, onMount } from "svelte";
   import PrunerGridImage from "./PrunerGridImage.svelte";
   import { initLogRocket } from "../helpers";
@@ -50,6 +50,7 @@
     observer = createObserver();
   }
 
+
   uiChunkPage.subscribe(() => {
     recreateObserver();
   });
@@ -61,9 +62,21 @@
   afterUpdate(() => {
     recreateObserver();
   });
+
+  function saveScrollMemory() {
+    const container = this as HTMLDivElement;
+    const key = $uiChunkPage;
+    const value = container.scrollTop;
+    uiChunkPageScrollMemory.update((memory) => {
+      memory[key] = value;
+      return memory;
+    });
+  }
+
+ 
 </script>
 
-<div class="container" bind:clientWidth={galleryWidth}>
+<div class="container" bind:clientWidth={galleryWidth} on:scroll={saveScrollMemory}>
   <div class="gallery" style={galleryStyle}>
     {#each $sourceFiles.slice($uiChunkPage * $uiChunkSize, ($uiChunkPage + 1) * $uiChunkSize) as file}
       <PrunerGridImage {file} />
@@ -75,8 +88,6 @@
   .container {
     overflow-y: auto; 
   }
-
-  
 
   .gallery {
     display: grid;

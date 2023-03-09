@@ -1,12 +1,23 @@
 
 <script lang="ts">
-  import { chunkPrompt, goToImagePrompt, pagePrompt } from "../../helpers";
-  import { sourceFiles, uiChunkPage, uiChunkSize } from "../../stores";
+  import { chunkPrompt, goToImagePrompt, loadScrollMemory, pagePrompt } from "../../helpers";
+  import { sourceFiles, uiChunkPage, uiChunkSize, uiChunkPageScrollMemory } from "../../stores";
   import AnimatedNumber from "../AnimatedNumber.svelte";
+
+  function gotoNextPage() {
+    uiChunkPage.update((n) => n + 1);
+    loadScrollMemory();
+  }
+
+  function gotoPreviousPage() {
+    uiChunkPage.update((n) => n - 1);
+    loadScrollMemory();
+  }
+  
 </script>
 
 <div>
-  <button on:click={() => uiChunkPage.update((n) => n - 1)} disabled={$uiChunkPage === 0}>
+  <button on:click={gotoPreviousPage} disabled={$uiChunkPage === 0}>
     Previous
   </button>
   <span class="page-details">
@@ -18,7 +29,7 @@
       ({$uiChunkPage * $uiChunkSize + 1} - {Math.min($uiChunkPage * $uiChunkSize + $uiChunkSize, $sourceFiles.length)})
     </span>
   </span>
-  <button on:click={() => uiChunkPage.update((n) => n + 1)} disabled={$uiChunkPage === Math.floor($sourceFiles.length / 100)}>
+  <button on:click={gotoNextPage} disabled={$uiChunkPage === Math.floor($sourceFiles.length / 100)}>
     Next
   </button>
   <button on:click={goToImagePrompt}>
