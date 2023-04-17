@@ -59,7 +59,7 @@ func main() {
 	
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "Roze v0.2.0",
+		Title:  "Roze v0.2.1",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{

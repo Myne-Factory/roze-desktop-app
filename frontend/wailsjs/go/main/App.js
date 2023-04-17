@@ -22,10 +22,18 @@ export function GetBase64Data(arg1) {
   return window['go']['main']['App']['GetBase64Data'](arg1);
 }
 
+export function GetPage(arg1) {
+  return window['go']['main']['App']['GetPage'](arg1);
+}
+
 export function ListImages(arg1, arg2) {
   return window['go']['main']['App']['ListImages'](arg1, arg2);
 }
 
 export function MoveFile(arg1, arg2) {
   return window['go']['main']['App']['MoveFile'](arg1, arg2);
+}
+
+export function SavePage(arg1, arg2) {
+  return window['go']['main']['App']['SavePage'](arg1, arg2);
 }

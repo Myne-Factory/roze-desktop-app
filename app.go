@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -257,6 +259,88 @@ func (a *App) FileExists(dir, fileName string) (bool, error) {
 			// The file exists
 			return true, nil
 	}
+}
+
+func (a *App) SavePage(path string, page int) {
+	// Load existing data from file
+	data, err := loadDataFromFile("data.json")
+	if err != nil {
+		fmt.Println("Error loading data:", err)
+		return
+	}
+
+	// Add new key-value pair
+	data[path] = page
+
+	// Save updated data to file
+	err = saveDataToFile("data.json", data)
+	if err != nil {
+		fmt.Println("Error saving data:", err)
+		return
+	}
+
+	fmt.Printf("Saved page %d for path %s\n", page, path)
+}
+
+func (a *App) GetPage(path string) (int, error) {
+	// Load data from file
+	data, err := loadDataFromFile("data.json")
+	if err != nil {
+		return 0, err
+	}
+
+	// Lookup page number by path
+	page, ok := data[path]
+	if !ok {
+		return 0, fmt.Errorf("page not found for path %s", path)
+	}
+
+	return page, nil
+}
+
+func loadDataFromFile(fileName string) (map[string]int, error) {
+	data := make(map[string]int)
+
+	// Open file for reading
+	file, err := os.Open(fileName)
+	if err != nil {
+		// Return empty data if file doesn't exist yet
+		if os.IsNotExist(err) {
+			return data, nil
+		}
+		return nil, err
+	}
+	defer file.Close()
+
+	// Read file contents
+	contents, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal JSON data
+	err = json.Unmarshal(contents, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func saveDataToFile(fileName string, data map[string]int) error {
+	// Marshal data to JSON
+	contents, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// Write JSON data to file
+	err = ioutil.WriteFile(fileName, contents, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) GetBase64Data(path string) (string) {

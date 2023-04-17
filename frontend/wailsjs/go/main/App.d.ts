@@ -12,6 +12,10 @@ export function FileExists(arg1:string,arg2:string):Promise<boolean>;
 
 export function GetBase64Data(arg1:string):Promise<string>;
 
+export function GetPage(arg1:string):Promise<number>;
+
 export function ListImages(arg1:string,arg2:string):Promise<Array<main.Image>>;
 
 export function MoveFile(arg1:string,arg2:string):Promise<void>;
+
+export function SavePage(arg1:string,arg2:number):Promise<void>;
